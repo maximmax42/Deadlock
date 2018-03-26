@@ -1,0 +1,11 @@
+C:\Users\maxim\source\repos\Deadlock\Deadlock\bin\Debug\Deadlock.exe.config
+C:\Users\maxim\source\repos\Deadlock\Deadlock\bin\Debug\Deadlock.exe
+C:\Users\maxim\source\repos\Deadlock\Deadlock\bin\Debug\Deadlock.pdb
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.Properties.Resources.resources
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.csproj.GenerateResource.cache
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.csproj.CoreCompileInputs.cache
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.exe
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.pdb
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.roundButton.resources
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.csprojResolveAssemblyReference.cache
+C:\Users\maxim\source\repos\Deadlock\Deadlock\obj\Debug\Deadlock.FormDeadlock.resources
