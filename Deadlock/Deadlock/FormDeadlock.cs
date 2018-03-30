@@ -10,23 +10,46 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 
+/*--------------------------------\
+|I am sorry for my code is a mess.|
+|              Amen.              |
+\--------------------------------*/
+
 namespace Deadlock
 {
     public partial class FormDeadlock : Form
     {
+        // Current amount of inputted digits, -1 by default is to show that the app was run first time
         int nums = -1;
+        // State of "Try Again" screen:
+        // 0 - not that screen, 1 - flashy crosses sequence/"Access Granted" sequence
+        // 2 - sequence ended
         int stateTryAgain = 0;
+        // How many times did the user input correct password
+        int trueRetries = 0;
+        // You will need to type in the password 5 to 10 times before getting the "Access Granted"
+        int trueNeededRetries = new Random().Next(4, 9);
+        // Current password
         string curPassword = "";
+        // Duh, required password
         const string realPassword = "59812598948524898";
+        // I put them in a list so it will be easier to disable them all at once with foreach
         List<RoundButton> numberButtons = new List<RoundButton>();
+        // Screen images for the inputed password
         List<Bitmap> images = new List<Bitmap>();
 
+        // I hate this piece of garbage, but I couldn't get any other way of playing sounds to work
+        // I just want to have something that could play multiple sounds at once :c
         private void PlaySound(string name) => new SoundPlayer(Properties.Resources.ResourceManager.GetStream("snd_" + name)).Play();
 
         public FormDeadlock()
         {
             InitializeComponent();
+            // windows95_startup.ogg
             PlaySound("startup");
+            // Because 9 lines of stuff like
+            //   roundButton1.Enabled = false;
+            // aren't worth it
             numberButtons.Add(roundButton1);
             numberButtons.Add(roundButton2);
             numberButtons.Add(roundButton3);
@@ -36,6 +59,7 @@ namespace Deadlock
             numberButtons.Add(roundButton7);
             numberButtons.Add(roundButton8);
             numberButtons.Add(roundButton9);
+            // And here I just added the list because it's really easy to do images[i], where i runs from 0 to 17
             images.Add(null);
             images.Add(Properties.Resources.screen_password1);
             images.Add(Properties.Resources.screen_password2);
@@ -56,8 +80,10 @@ namespace Deadlock
             images.Add(Properties.Resources.screen_password17);
         }
 
+        // Method for the 0 aka OK button
         private async void roundButton0_Click(object sender, EventArgs e)
         {
+            // If this is first boot of the app or the Try Again sequence added
             if (nums == -1 || stateTryAgain == 2)
             {
                 PlaySound("0");
@@ -68,8 +94,10 @@ namespace Deadlock
                 return;
             }
 
+            // If the password confirmed to be wrong...
             if (stateTryAgain == 1)
             {
+                // ...we play that sexy voice saying "Try again!"
                 PlaySound("0_tryagain");
                 pictureBoxScreen.BackgroundImage = Properties.Resources.screen_tryagain_no;
                 roundButton0.Enabled = false;
@@ -78,23 +106,30 @@ namespace Deadlock
                 return;
             }
 
+            // If none of above (as in when we need to confirm if password is right or wrong)
             stateTryAgain = 1;
-            roundButton0.Enabled = false;
+            roundButton0.Enabled = false;            
 
-            void func()
-            {
+            // Love you, async
+            // Eff you, manual thread creation
+            await Task.Factory.StartNew(() => {
                 if (curPassword == realPassword)
                 {
-                    PlaySound("0");
-                    pictureBoxScreen.BackgroundImage = null;
-                    Thread.Sleep(1500);
-                    pictureBoxScreen.BackgroundImage = Properties.Resources.screen_accessgranted;
-                    PlaySound("accessgranted");
-                    Thread.Sleep(2000);
-                    Application.Exit();
+                    if (trueRetries == trueNeededRetries)
+                    {
+                        PlaySound("0");
+                        pictureBoxScreen.BackgroundImage = null;
+                        Thread.Sleep(1500);
+                        pictureBoxScreen.BackgroundImage = Properties.Resources.screen_accessgranted;
+                        PlaySound("accessgranted");
+                        Thread.Sleep(2000);
+                        Application.Exit();
+                    }
+                    else trueRetries++;
                 }
 
                 PlaySound("0_wrong");
+                // That animation code... [sarcasm]Beautiful.[/sarcasm]
                 pictureBoxScreen.BackgroundImage = Properties.Resources.screen_wrongpassword;
                 Thread.Sleep(300);
                 pictureBoxScreen.BackgroundImage = null;
@@ -102,25 +137,26 @@ namespace Deadlock
                 pictureBoxScreen.BackgroundImage = Properties.Resources.screen_wrongpassword;
                 Thread.Sleep(300);
                 pictureBoxScreen.BackgroundImage = null;
-            }
-
-            await Task.Factory.StartNew(func);
+            });
             roundButton0.Enabled = true;
         }
 
+        // Common method for all the 1-9 buttons
         private void roundButton_Click(object sender, EventArgs e)
         {
+            // If we still input the password
             if (stateTryAgain == 0)
             {
-                nums++;
-                pictureBoxScreen.BackgroundImage = images[nums];
+                pictureBoxScreen.BackgroundImage = images[++nums];
                 RoundButton button = (RoundButton)sender;
-                for (int i = 0; i < 9; i++) if (button == numberButtons[i])
-                    {
-                        curPassword += (i + 1).ToString();
-                        PlaySound((i + 1).ToString());
-                    }
+                char btnNum = button.Name[button.Name.Length - 1];
+                curPassword += btnNum;
+                // Notes for the final input are different, and this is my "great" way to detect that
+                if (trueRetries == trueNeededRetries && curPassword + "8" == realPassword) PlaySound("2");
+                else if (trueRetries == trueNeededRetries && curPassword == realPassword) PlaySound("1");
+                else PlaySound(btnNum.ToString());
             }
+            // If we need to move the > to YES
             else
             {
                 pictureBoxScreen.BackgroundImage = Properties.Resources.screen_tryagain_yes;
@@ -129,6 +165,7 @@ namespace Deadlock
             }
         }
 
+        // Enabling/disabling certain button sets when typing the password
         private void pictureBoxScreen_BackgroundImageChanged(object sender, EventArgs e)
         {
             if (pictureBoxScreen.BackgroundImage == images[17])
